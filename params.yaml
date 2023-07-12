@@ -1,0 +1,27 @@
+base:
+  project: telecom_customer_churn_prediction
+  random_state: 47
+  target_col: Churn
+
+data_source:
+  # gs_path: gs://dvc_project/
+  local_path: data/telecom_churn.csv
+
+split:
+  dir: data/split
+  train_file: train.csv
+  test_file: test.csv
+  split_ratio: 0.20
+
+process:
+  dir: data/processed
+  train_file: final_train.csv
+  test_file: final_test.csv
+
+train:
+  params:
+    n_estimators: 300
+    max_depth: 5
+
+    class_weight: balanced
+model_dir: model
