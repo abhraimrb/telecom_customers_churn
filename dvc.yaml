@@ -1,0 +1,48 @@
+stages:
+  data_split:
+    cmd: python source/data_split.py
+    deps:
+    - source/data_split.py
+    params:
+    - base.random_state
+    - data_source.local_path
+    - split.split_ratio
+    outs:
+    - data/split
+  data_processing:
+    cmd: python source/data_processing.py data/processed
+    deps:
+    - data/split
+    - source/data_processing.py
+    params:
+    - process.dir
+    - process.test_file
+    - process.train_file
+    - split.dir
+    - split.test_file
+    - split.train_file
+    outs:
+    - data/processed
+  train:
+    cmd: python source/train.py data/features model/model.pkl
+    deps:
+    - data/processed
+    - source/train.py
+    params:
+    - base.random_state
+    - base.target_col
+    - model_dir
+    - process.dir
+    - process.test_file
+    - process.train_file
+    - train.params
+    outs:
+    - model/model.pkl
+  evaluate:
+    cmd: python source/evaluate.py model/model.pkl data/processed
+    deps:
+    - data/processed
+    - model/model.pkl
+    - source/evaluate.py
+    outs:
+    - eval/importance.png
