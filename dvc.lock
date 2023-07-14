@@ -1,0 +1,109 @@
+schema: '2.0'
+stages:
+  data_split:
+    cmd: python source/data_split.py data/telecom_churn.csv
+    deps:
+    - path: source/data_split.py
+      md5: 79ef2468c27571601c2e4ed557ab0a53
+      size: 1228
+    params:
+      params.yaml:
+        base.random_state: 47
+        data_source.local_path: data/telecom_churn.csv
+        split.split_ratio: 0.2
+    outs:
+    - path: data/split
+      md5: d95f200a6359b0cd81c0d591734939a7.dir
+      size: 134685
+      nfiles: 2
+  data_processing:
+    cmd: python source/data_processing.py data/processed
+    deps:
+    - path: data/split
+      md5: d95f200a6359b0cd81c0d591734939a7.dir
+      size: 134685
+      nfiles: 2
+    - path: source/data_processing.py
+      md5: f9328a5ce9fd23dd845fcd06de47cfea
+      size: 1416
+    params:
+      params.yaml:
+        process.dir: data/processed
+        process.test_file: final_test.csv
+        process.train_file: final_train.csv
+        split.dir: data/split
+        split.test_file: test.csv
+        split.train_file: train.csv
+    outs:
+    - path: data/processed
+      md5: 878d1c18179af2f5d8e8082d444a80b2.dir
+      size: 134685
+      nfiles: 2
+  train:
+    cmd: python source/train.py processed_data/out_train.csv model_dir/model.pkl
+    deps:
+    - path: processed_data/out_train.csv
+      md5: ef13bcadaa6b930b29e7a94c7721b49e
+      size: 120092
+    - path: source/train.py
+      md5: 731f1794f9b00fa0f0c31b2d5377c63a
+      size: 785
+    params:
+      params.yaml:
+        train.max_depth: 10
+        train.model_dir: model_dir
+        train.n_estimators: 500
+    outs:
+    - path: model_dir/model.pkl
+      md5: 3520963e8ce376aab9cba1074b506f74
+      size: 8541335
+  evaluate:
+    cmd: python source/evaluate.py model_dir/model.pkl processed_data/out_test.csv
+    deps:
+    - path: source/evaluate.py
+      md5: 14db679fec23819edcfe36ae850c9a9c
+      size: 1410
+    outs:
+    - path: metrics.json
+      md5: 4139792e5f688fd2b6979ec55a73405c
+      size: 154
+    - path: prc.json
+      md5: 919f85e9befccbbc4b9fd2bfca43df29
+      size: 65119
+    - path: results/submission.csv
+      md5: 4fe0ef3a4037ff7b8e3ecfe70df021e1
+      size: 5244
+  prepare:
+    cmd: python source/prepare.py data/telecom_churn.csv
+    deps:
+    - path: data/telecom_churn.csv
+      md5: 7e9408e150902c60c39600283f40e4ee
+      size: 128828
+    - path: source/prepare.py
+      md5: 44788f258eaa65f75d4a4b8abfd71b43
+      size: 583
+    params:
+      params.yaml:
+        prepare.split: 0.2
+    outs:
+    - path: prepared
+      md5: 8989df736d8880f99d4fd06bfc818922.dir
+      size: 150242
+      nfiles: 2
+  data_process:
+    cmd: python source/data_process.py data/telecom_churn.csv
+    deps:
+    - path: data/telecom_churn.csv
+      md5: 7e9408e150902c60c39600283f40e4ee
+      size: 128828
+    - path: source/data_process.py
+      md5: f20fe8a574c95700f9c593bbe99d088b
+      size: 612
+    params:
+      params.yaml:
+        data_process.split_ratio: 0.2
+    outs:
+    - path: processed_data
+      md5: 5d1c477682a1d7dd6889e2b07148eb5f.dir
+      size: 150242
+      nfiles: 2
