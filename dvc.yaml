@@ -1,0 +1,43 @@
+stages:
+  data_process:
+    cmd: python source/data_process.py data/telecom_churn.csv
+    deps:
+    - data/telecom_churn.csv
+    - source/data_process.py
+    params:
+    - data_process.split_ratio
+    outs:
+    - processed_data
+
+  train:
+    cmd: python source/train.py processed_data/out_train.csv model_dir/model.pkl 
+    deps:
+    - processed_data/out_train.csv
+    - source/train.py
+    params:
+    - train.model_dir
+    - train.max_depth
+    - train.n_estimators
+    outs:
+    - model_dir/model.pkl
+  evaluate:
+    cmd: python source/evaluate.py model_dir/model.pkl processed_data/out_test.csv
+    deps:
+    - source/evaluate.py
+    metrics:
+    - metrics.json:
+        cache: false
+    plots:
+    - prc.json:
+        cache: false
+        x: recall
+        y: precision
+        title: Precision-Recall Curve
+    - results/submission.csv:
+        x: Actual
+        y: Predicted
+        title: Confusion matrix
+        template: confusion
+        x_label: Actual class
+        y_label: Predicted class
+

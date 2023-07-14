@@ -1,0 +1,6 @@
+data_process:
+  split_ratio: 0.20
+train:
+  n_estimators: 200
+  max_depth: 10
+  model_dir: model_dir
